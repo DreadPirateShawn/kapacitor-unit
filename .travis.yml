@@ -1,8 +1,13 @@
 language: go
+
 go:
   - master
+
+services:
+  - docker
+
 install:
   - go get -u gopkg.in/h2non/gock.v1
-  - make setup
+  - make travis-ci-setup
 
 script: make tests

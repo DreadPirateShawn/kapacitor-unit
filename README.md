@@ -26,28 +26,40 @@ Read more about the idea and motivation behind kapacitor-unit in
 :soon: Run tests for **stream** and **batch** TICK scripts using recordings 
 
 
-## Requirements:
+## Requirements
+
+To run tests, both Kapacitor and Influx need to be running. (The latter is used for batch queries.)
+
+These can be started using [docker-compose](https://docs.docker.com/compose/install/):
+```
+make start-kapacitor-and-influx
+```
 
 In order for all features to be supported, the Kapacitor version running the tests must be v1.3.4 or higher.
 
-## Running kapacitor-unit:
+## Installing kapacitor-unit
 
-
-1) Install kapacitor-unit and run
-
+**Binary from upstream:**
 ```
- $ make install
- $ make build
-
- $ make run  	# same as ./cmd/kapacitor-unit/kapacitor-unit
+ $ curl -L https://github.com/DreadPirateShawn/kapacitor-unit/raw/master/main -o /usr/local/bin/kapacitor-unit
+ $ chmod a+x /usr/local/bin/kapacitor-unit
 ```
 
-You can add `./cmd/kapacitor-unit/kapacitor-unit` to your `$PATH` so you can
-easily call the `kapacitor-unit` executable  anywhere.
+**Building from source:**
+```
+ $ go install ./cmd/kapacitor-unit
+ $ kapacitor-unit
+```
 
-2) Define the test configuration file (see below) 
+**Running from source without rebuilding:**
+```
+ $ go run ./cmd/kapacitor-unit/main.go
+```
 
-3) Run the tests
+Note that the Makefile uses a docker container to support testing / development
+without locally installing golang.
+
+## Running tests
 
 ```
 kapacitor-unit --dir <*.tick directory> --kapacitor <kapacitor host> --influxdb <influxdb host> --tests <test configuration path>
@@ -114,7 +126,7 @@ tests:
 
 ```  
 
-## Contributions:
+## Contributions
 
 Fork and PR and use issues for bug reports, feature requests and general comments.
 
