@@ -117,14 +117,18 @@ tests:
     rp: default 
     type: batch
     data:
-      - weather,location=us-midwest temperature=80
-      - weather,location=us-midwest temperature=82
+      - weather,location=us-midwest temperature=80 now()-1m
+      - weather,location=us-midwest temperature=82 now()
     expects:
       ok: 0
       warn: 1
       crit: 0
 
 ```  
+
+Note that `now() - 30m + 1m` relative influx timestamps can be used in batch data;
+the only usage requirement is that `now()` needs to start the dynamic timestamp.
+This currently only supports hours `h`, minute `m`, and seconds `s`.
 
 ## Contributions
 

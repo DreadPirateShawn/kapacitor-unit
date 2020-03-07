@@ -1,7 +1,7 @@
 tests:
 
   # batch script
-  - name: "Alert weather:: batch"  
+  - name: "Alert weather:: batch no timestamps"
     task_name: alert_weather_batch.tick
     db: weather
     rp: default
@@ -9,6 +9,20 @@ tests:
     data:
       - temperature,location=us-midwest temperature=110
       - temperature,location=us-midwest temperature=91
+    expects:
+      ok: 0
+      warn: 0
+      crit: 1
+
+  # batch script
+  - name: "Alert weather:: batch dynamic timestamps"
+    task_name: alert_weather_batch.tick
+    db: weather
+    rp: default
+    type: batch
+    data:
+      - temperature,location=us-midwest temperature=110 now()-1m
+      - temperature,location=us-midwest temperature=91  NOW()
     expects:
       ok: 0
       warn: 0
