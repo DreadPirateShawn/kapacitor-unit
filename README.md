@@ -126,6 +126,54 @@ tests:
 
 ```  
 
+## Local development
+
+Local golang code changes can be tested using the `replace`
+feature of [Go modules](https://github.com/golang/go/wiki/Modules).
+
+For instance, to test local changes to `io/influxdb.go`:
+
+**Create go.mod inside the `./io` subdirectory**
+```
+ $ docker run -it \
+     --mount type=bind,source="$(pwd)",target=/kapacitor-unit \
+     --workdir /kapacitor-unit \
+     golang:1.12.9-buster \
+     /bin/bash
+
+ /kapacitor-unit# cd io
+ /kapacitor-unit/io# go mod init "kapacitor-unit/io"
+ /kapacitor-unit/io# exit
+
+ $ sudo chown $(stat Makefile --format='%u.%g') io/go.mod
+```
+
+**Add `replace` to go.mod**
+```
+require (
+	...
+	github.com/DreadPirateShawn/kapacitor-unit/io v0.0.0
+)
+
+replace github.com/DreadPirateShawn/kapacitor-unit/io => ./io
+```
+
+**Verify you succeeded**
+This will run `go list -m all` in a Docker container, and should
+reflect the above local replacement if you succeeded.
+```
+make go-list
+```
+
+Once you're finished testing, remeber to remove the subdirectory `go.mod`
+and remove the require/replace pair added to go.mod.
+
+**Note:** The above approach may change as Go versions increase, and
+involves things like `chown` which aren't necessary if you're using locally
+installed golang (rather than docker container isolation). It also reflects
+the landscape that package management in Go can be an extremely dense topic --
+this is at least one way to achieve the goal.
+
 ## Contributions
 
 Fork and PR and use issues for bug reports, feature requests and general comments.

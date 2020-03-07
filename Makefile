@@ -22,6 +22,10 @@ build:
 	docker run $(DOCKER_PARAMS) $(GOLANG_IMAGE) \
 	  go build ./cmd/kapacitor-unit/main.go
 
+go-list:
+	docker run $(DOCKER_PARAMS) $(GOLANG_IMAGE) \
+	  go list -m all
+
 start-kapacitor-and-influx:
 	docker-compose -f infra/docker-compose.yml up -d
 
