@@ -1,7 +1,14 @@
 GOLANG_IMAGE=golang:1.12.9-buster
+
+# Mount local project as working directory.
+# Run as current host user, to ensure created files have similar permissions.
+# (Specify GOCACHE since default /.cache only works as root.)
+# Use network host, so that samples can interact with local kapacitor & influxdb.
 DOCKER_PARAMS=\
   --mount type=bind,source="$(shell pwd)",target=/kapacitor-unit \
   --workdir /kapacitor-unit \
+  --user $(shell stat Makefile --format='%u:%g') \
+  --env GOCACHE=/tmp/.cache \
   --network host
 
 travis-ci-setup:
