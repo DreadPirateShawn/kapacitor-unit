@@ -21,6 +21,7 @@ type Test struct {
 	Result   Result
 	Db       string
 	Rp       string
+	Duration string
 	Type     string
 	Task     task.Task
 }
@@ -96,7 +97,7 @@ func (t *Test) setup(k io.Kapacitor, i io.Influxdb) error {
 	glog.Info("DEBUG:: setup test: ", t.Name)
 	switch t.Type {
 	case "batch":
-		err := i.Setup(t.Db, t.Rp)
+		err := i.Setup(t.Db, t.Duration, t.Rp)
 		if err != nil {
 			return err
 		}
@@ -112,7 +113,7 @@ func (t *Test) setup(k io.Kapacitor, i io.Influxdb) error {
 
 	dbrp, _ := regexp.MatchString(`(?m:^dbrp \"\w+\"\.\"\w+\"$)`, t.Task.Script)
 	if !dbrp {
-		f["dbrps"] = []map[string]string{{"db": t.Db, "rp": t.Rp}}
+		f["dbrps"] = []map[string]string{{"db": t.Db, "duration": t.Duration, "rp": t.Rp}}
 	}
 
 	err := k.Load(f)

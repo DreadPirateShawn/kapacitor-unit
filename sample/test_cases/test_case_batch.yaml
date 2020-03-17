@@ -15,14 +15,21 @@ tests:
       crit: 1
 
   # batch script
-  - name: "Alert weather:: batch dynamic timestamps"
+  - name: "Alert rain:: batch dynamic timestamps"
     task_name: alert_weather_batch.tick
     db: weather
     rp: default
+    duration: 3h30m
     type: batch
     data:
-      - temperature,location=us-midwest temperature=110 now()-1m
-      - temperature,location=us-midwest temperature=91  NOW()
+      - rain,location=us-midwest precipitation=5   NOW()-2h
+      - rain,location=us-midwest precipitation=10  now()-2h+10m
+      - rain,location=us-midwest precipitation=10  now()-2h+20m
+      - rain,location=us-midwest precipitation=10  now()-2h+30m
+      - rain,location=us-midwest precipitation=10  now()-2h+40m
+      - rain,location=us-midwest precipitation=10  now()-2h+50m
+      - rain,location=us-midwest precipitation=10  now()-1h
+      - rain,location=us-midwest precipitation=10  now()-1h+10m
     expects:
       ok: 0
       warn: 0

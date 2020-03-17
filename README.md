@@ -115,6 +115,7 @@ tests:
     task_id: alert_weather.tick
     db: weather
     rp: default 
+    duration: 30m
     type: batch
     data:
       - weather,location=us-midwest temperature=80 now()-1m

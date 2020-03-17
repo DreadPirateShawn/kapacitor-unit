@@ -9,11 +9,12 @@ var weather = batch
 
 var rain = batch
 	| query('''
-		SELECT count(rain) 
-		FROM "weather"."default"."temperature"
+		SELECT count(precipitation)
+		FROM "weather"."default"."rain"
 	''')
-		.period(5m)
+		.period(3h)
 		.every(3d)
+		.groupBy(time(1h), 'location')
 
 
 // simple case with only one batch query
@@ -25,3 +26,11 @@ var rain = batch
 		.crit(lambda: "mean" > 100)
 		.stateChangesOnly()
     .log('/tmp/temperature_batch.tick.log')
+
+	rain
+	| alert().id('Rain')
+		.message('Rain alert - batch')
+		.warn(lambda: "count" > 2)
+		.crit(lambda: "count" > 5)
+		.stateChangesOnly()
+    .log('/tmp/rain_batch.tick.log')

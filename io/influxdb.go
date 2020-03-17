@@ -95,13 +95,17 @@ func (influxdb Influxdb) Data(data []string, db string, rp string) error {
 }
 
 // Creates db and rp where tests will run
-func (influxdb Influxdb) Setup(db string, rp string) error {
+func (influxdb Influxdb) Setup(db string, duration string, rp string) error {
 	glog.Info("DEGUB:: Influxdb setup ", db+":"+rp)
 	// If no retention policy is defined, use "autogen"
 	if rp == "" {
 		rp = "autogen"
 	}
-	q := "q=CREATE DATABASE \""+db+"\" WITH DURATION 1h REPLICATION 1 NAME \""+rp+"\""
+	// If no duration is defined, use "1h" (original hardcoded value, to reduce regression risk)
+	if duration == "" {
+		duration = "1h"
+	}
+	q := "q=CREATE DATABASE \""+db+"\" WITH DURATION "+duration+" REPLICATION 1 NAME \""+rp+"\""
 	baseUrl := influxdb.Host + "/query"
 	_, err := influxdb.Client.Post(baseUrl, "application/x-www-form-urlencoded",
 		bytes.NewBuffer([]byte(q)))
