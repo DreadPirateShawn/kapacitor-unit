@@ -15,21 +15,23 @@ tests:
       crit: 1
 
   # batch script
-  - name: "Alert rain:: batch dynamic timestamps"
+  - name: "Alert snow:: batch dynamic timestamps"
     task_name: alert_weather_batch.tick
     db: weather
     rp: default
     duration: 3h30m
     type: batch
     data:
-      - rain,location=us-midwest precipitation=5   NOW()-2h
-      - rain,location=us-midwest precipitation=10  now()-2h+10m
-      - rain,location=us-midwest precipitation=10  now()-2h+20m
-      - rain,location=us-midwest precipitation=10  now()-2h+30m
-      - rain,location=us-midwest precipitation=10  now()-2h+40m
-      - rain,location=us-midwest precipitation=10  now()-2h+50m
-      - rain,location=us-midwest precipitation=10  now()-1h
-      - rain,location=us-midwest precipitation=10  now()-1h+10m
+      # Note, deliberately including "now" (via "snow")
+      # in the data, to make sure 'now()' targeting is clean.
+      - snow,location=us-midwest precipitation=5   NOW()-2h
+      - snow,location=us-midwest precipitation=10  now()-2h+10m
+      - snow,location=us-midwest precipitation=10  now()-2h+20m
+      - snow,location=us-midwest precipitation=10  now()-2h+30m
+      - snow,location=us-midwest precipitation=10  now()-2h+40m
+      - snow,location=us-midwest precipitation=10  now()-2h+50m
+      - snow,location=us-midwest precipitation=10  now()-1h
+      - snow,location=us-midwest precipitation=10  now()-1h+10m
     expects:
       ok: 0
       warn: 0

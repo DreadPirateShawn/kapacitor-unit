@@ -7,10 +7,10 @@ var weather = batch
 			.period(5m)
 			.every(10m)
 
-var rain = batch
+var snow = batch
 	| query('''
 		SELECT count(precipitation)
-		FROM "weather"."default"."rain"
+		FROM "weather"."default"."snow"
 	''')
 		.period(3h)
 		.every(3d)
@@ -27,10 +27,12 @@ var rain = batch
 		.stateChangesOnly()
     .log('/tmp/temperature_batch.tick.log')
 
-	rain
-	| alert().id('Rain')
-		.message('Rain alert - batch')
+// case with dynamic data
+
+	snow
+	| alert().id('Snow')
+		.message('Snow alert - batch')
 		.warn(lambda: "count" > 2)
 		.crit(lambda: "count" > 5)
 		.stateChangesOnly()
-    .log('/tmp/rain_batch.tick.log')
+    .log('/tmp/snow_batch.tick.log')

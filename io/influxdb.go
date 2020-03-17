@@ -27,9 +27,10 @@ var (
 	// Matches '30s', '1h30m', etc -- case-sensitive to match influx
 	// Only supports hours (h), minutes (m), seconds (s).
 	regexpTimeDuration = regexp.MustCompile("([0-9]+[smh])+")
-	// 'now()' search -- case-insensitive to match influx
-	nowStr = "now()"
-	regexpNow = regexp.MustCompile("(?i)"+nowStr)
+	// 'now()' search -- case-insensitive to match influx, must follow whitespace.
+	// most reliable (and cleanest) is just to capture all line parts,
+	// rather than using 'now()' index to disassemble.
+	lineRegex = regexp.MustCompile(`(.*)\s+[Nn][Oo][Ww]\(\)(.*)`)
 	now = strconv.FormatInt(time.Now().UnixNano(), 10)
 )
 
@@ -37,7 +38,7 @@ var (
 func humanToNanoTime(value []byte) ([]byte) {
 	dura, err := time.ParseDuration(string(value))
 	if err != nil {
-	    return value
+		return value
 	}
 	return []byte(strconv.FormatInt(dura.Nanoseconds(), 10))
 }
@@ -48,7 +49,7 @@ func humanToNanoTime(value []byte) ([]byte) {
 func evaluateMath(value string) (string, error) {
 	timeMathResult, err := gval.Evaluate(value, map[string]interface{}{})
 	if err != nil {
-	    return value, err
+		return value, err
 	}
 	return strconv.FormatFloat(timeMathResult.(float64), 'f', 0, 64), nil
 }
@@ -56,24 +57,22 @@ func evaluateMath(value string) (string, error) {
 // return line with time segment replaced by dynamically-calculated timestamp
 func translateTimestamp(value string) (string, error) {
 	// find 'now()'
-	posNowResp := regexpNow.FindStringIndex(value)
-	if posNowResp == nil {
+	lineParts := lineRegex.FindStringSubmatch(value)
+	if lineParts == nil {
 		// if not found, use timestamp as-is
 		return value, nil
 	}
-	posNow := posNowResp[0]
-	posNowEnd := posNow + len(nowStr)
-	// if found, treat from 'now()' until end of line as time formula
-	timeSegment := now+value[posNowEnd:len(value)]
+	timeSegment := now+lineParts[2]
 	// replace all human-readable '1m', '30s' with corresponding nanoseconds
 	newTimeSegment := string(regexpTimeDuration.ReplaceAllFunc([]byte(timeSegment), humanToNanoTime))
 	// evaluate math formula, e.g. '5-4' returns '1'
 	timeMathResult, err := evaluateMath(newTimeSegment)
 	if err != nil {
-	    return value, err
+		glog.Errorf("Processing error: value '%s' error: %s", value, err)
+		return value, err
 	}
 	// concat original string up to the 'now()' + final timestamp verdict
-	return value[0:posNow]+timeMathResult, nil
+	return lineParts[1]+" "+timeMathResult, nil
 }
 
 // Adds test data to influxdb
