@@ -15,6 +15,7 @@ var snow = batch
 		.period(3h)
 		.every(3d)
 		.groupBy(time(1h), 'location')
+		.alignGroup()
 
 
 // simple case with only one batch query

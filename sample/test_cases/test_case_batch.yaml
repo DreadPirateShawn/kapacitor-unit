@@ -24,6 +24,10 @@ tests:
     data:
       # Note, deliberately including "now" (via "snow")
       # in the data, to make sure 'now()' targeting is clean.
+      #
+      # Note, target tick must include .alignGroup(), or else
+      # the time groupings will be aligned with fixed boundaries,
+      # rather than purely relative to NOW().
       - snow,location=us-midwest precipitation=5   NOW()-2h
       - snow,location=us-midwest precipitation=10  now()-2h+10m
       - snow,location=us-midwest precipitation=10  now()-2h+20m
