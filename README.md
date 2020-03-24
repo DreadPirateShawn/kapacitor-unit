@@ -131,6 +131,13 @@ Note that `now() - 30m + 1m` relative influx timestamps can be used in batch dat
 the only usage requirement is that `now()` needs to start the dynamic timestamp.
 This currently only supports hours `h`, minute `m`, and seconds `s`.
 
+### Debugging
+
+Note that `log()` nodes added to tick script will appear in the kapacitor logs.
+When running samples in this project, see [kapacitor config](infra/kapacitor/kapacitor.conf)
+to determine whether that's a log file or STDERR, noting that the former (file)
+will exist inside the target running kapacitor container.
+
 ## Contributions
 
 Fork and PR and use issues for bug reports, feature requests and general comments.
