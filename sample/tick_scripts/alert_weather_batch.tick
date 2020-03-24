@@ -19,9 +19,12 @@ var snow = batch
 
 
 // simple case with only one batch query
+//   https://github.com/gpestana/kapacitor-unit/issues/41
+//   * must include topic() + stateChangesOnly()
 
 	weather
 	| alert().id('Temperature')
+		.topic('weather')
 		.message('Temperature alert - batch')
 		.warn(lambda: "mean" > 80)
 		.crit(lambda: "mean" > 100)

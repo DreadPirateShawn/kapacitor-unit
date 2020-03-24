@@ -42,7 +42,7 @@ func TestLoad(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
+func TestDeleteTask(t *testing.T) {
 	h := "http://test:9093"
 	k := NewKapacitor(h)
 	tid := "task_id"
@@ -51,9 +51,41 @@ func TestDelete(t *testing.T) {
 		Delete("/kapacitor/v1/tasks/" + tid).
 		Reply(204)
 
-	err := k.Delete(tid)
+	err := k.DeleteTask(tid)
 	if err != nil {
-		t.Error("Delete: Error when deleting a valid id:: ", err)
+		t.Error("Delete Task: Error when deleting a valid id:: ", err)
+	}
+}
+
+func TestDeleteAllTopics(t *testing.T) {
+	h := "http://test:9093"
+	k := NewKapacitor(h)
+
+	// TODO: Technically this could return an actual list of topics,
+	// and then we could test subsequent deletion.
+	// Currently out of scope.
+	gock.New(h).
+		Get("/kapacitor/v1/alerts/topics").
+		Reply(200)
+
+	err := k.DeleteAllTopics()
+	if err != nil {
+		t.Error("Delete All Topics: Error when deleting:: ", err)
+	}
+}
+
+func TestDeleteTopic(t *testing.T) {
+	h := "http://test:9093"
+	k := NewKapacitor(h)
+	tid := "topic_id"
+
+	gock.New(h).
+		Delete("/kapacitor/v1/alerts/topics/" + tid).
+		Reply(204)
+
+	err := k.DeleteTopic(tid)
+	if err != nil {
+		t.Error("Delete Topic: Error when deleting a valid id:: ", err)
 	}
 }
 

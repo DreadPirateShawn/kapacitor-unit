@@ -46,7 +46,7 @@ func (k Kapacitor) Load(f map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
-	
+
 	u := k.Host + tasks
 	res, err := k.Client.Post(u, "application/json", bytes.NewBuffer(j))
 	if err != nil {
@@ -60,8 +60,63 @@ func (k Kapacitor) Load(f map[string]interface{}) error {
 	return nil
 }
 
+type Topic struct {
+	Id string
+}
+type TopicResponse struct {
+	Topics []Topic
+}
+
+// Deletes all topics
+func (k Kapacitor) DeleteAllTopics() error {
+	u := k.Host + topics
+	r, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		return err
+	}
+	resp, err2 := k.Client.Do(r)
+	if err2 != nil {
+		return err2
+	}
+	defer resp.Body.Close()
+	body, err3 := ioutil.ReadAll(resp.Body)
+	if err3 != nil {
+		return err3
+	}
+	var topicResponse TopicResponse
+	json.Unmarshal(body, &topicResponse)
+	glog.Info("DEBUG:: All topics: ", topicResponse)
+	for _, topic := range topicResponse.Topics {
+		err4 := k.DeleteTopic(topic.Id)
+		if err4 != nil {
+			return err4
+		}
+	}
+	return nil
+}
+
+// Deletas a topic
+func (k Kapacitor) DeleteTopic(topic string) error {
+	u := k.Host + topics + "/" + topic
+	r, err := http.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return err
+	}
+	resp, err2 := k.Client.Do(r)
+	if err2 != nil {
+		return err2
+	}
+	defer resp.Body.Close()
+	body, err3 := ioutil.ReadAll(resp.Body)
+	if err3 != nil {
+		return nil
+	}
+	glog.Info("DEBUG:: Kapacitor deleted topic: ", string(body))
+	return nil
+}
+
 // Deletes a task
-func (k Kapacitor) Delete(id string) error {
+func (k Kapacitor) DeleteTask(id string) error {
 	u := k.Host + tasks + "/" + id
 	r, err := http.NewRequest("DELETE", u, nil)
 	if err != nil {

@@ -1,6 +1,5 @@
 tests:
 
-  # batch script
   - name: "Alert weather:: batch no timestamps"
     task_name: alert_weather_batch.tick
     db: weather
@@ -14,7 +13,21 @@ tests:
       warn: 0
       crit: 1
 
-  # batch script
+  # https://github.com/gpestana/kapacitor-unit/issues/41
+  # repeat same test on a batch tick with 'topic()' and 'stateChangesOnly()'
+  - name: "Alert weather:: batch no timestamps: repeat same topic"
+    task_name: alert_weather_batch.tick
+    db: weather
+    rp: default
+    type: batch
+    data:
+      - temperature,location=us-midwest temperature=110
+      - temperature,location=us-midwest temperature=91
+    expects:
+      ok: 0
+      warn: 0
+      crit: 1
+
   - name: "Alert snow:: batch dynamic timestamps"
     task_name: alert_weather_batch.tick
     db: weather

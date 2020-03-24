@@ -142,9 +142,13 @@ func (t *Test) teardown(k io.Kapacitor, i io.Influxdb) {
 			glog.Error("Error performing teardown in cleanup. error: ", err)
 		}
 	}
-	err := k.Delete(t.TaskName)
+	err := k.DeleteTask(t.TaskName)
 	if err != nil {
-		glog.Error("Error performing teardown in delete error: ", err)
+		glog.Error("Error performing teardown in delete task: ", err)
+	}
+	err2 := k.DeleteAllTopics()
+	if err2 != nil {
+		glog.Error("Error performing teardown in delete all topics: ", err2)
 	}
 
 }

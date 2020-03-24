@@ -9,4 +9,5 @@ const (
 	kapacitor_write = "/kapacitor/v1/write?"
 	influxdb_write = "/write?"
 	tasks = "/kapacitor/v1/tasks"
+	topics = "/kapacitor/v1/alerts/topics"
 )
