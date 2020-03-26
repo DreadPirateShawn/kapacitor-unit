@@ -135,13 +135,6 @@ func (t *Test) wait() {
 // Deletes data, database and retention policies created to run the test
 func (t *Test) teardown(k io.Kapacitor, i io.Influxdb) {
 	glog.Info("DEBUG:: teardown test: ", t.Name)
-	switch t.Type {
-	case "batch":
-		err := i.CleanUp(t.Db)
-		if err != nil {
-			glog.Error("Error performing teardown in cleanup. error: ", err)
-		}
-	}
 	err := k.DeleteTask(t.TaskName)
 	if err != nil {
 		glog.Error("Error performing teardown in delete task: ", err)
@@ -150,7 +143,13 @@ func (t *Test) teardown(k io.Kapacitor, i io.Influxdb) {
 	if err2 != nil {
 		glog.Error("Error performing teardown in delete all topics: ", err2)
 	}
-
+	switch t.Type {
+	case "batch":
+		err := i.CleanUp(t.Db)
+		if err != nil {
+			glog.Error("Error performing teardown in cleanup. error: ", err)
+		}
+	}
 }
 
 // Fetches status of kapacitor task, stores it and compares expected test result

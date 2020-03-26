@@ -2,8 +2,12 @@ package io
 
 import (
 	"bytes"
+	"encoding/json"
+	"errors"
 	"github.com/golang/glog"
+	"github.com/influxdata/influxdb1-client/models"
 	"github.com/PaesslerAG/gval"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -93,6 +97,79 @@ func (influxdb Influxdb) Data(data []string, db string, rp string) error {
 	return nil
 }
 
+// Monitor for db create/delete
+func (influxdb Influxdb) MonitorCreate(db string) error {
+	glog.Info("DEGUB:: Influxdb create monitor ", db)
+	attempts := 10
+	for attempts > 0 {
+		verdict, err := influxdb.DoesDatabaseExist(db)
+		if err != nil {
+			return err
+		}
+		if verdict {
+			return nil
+		}
+		attempts--
+		time.Sleep(time.Second)
+	}
+	return errors.New("Database not found: "+db)
+}
+func (influxdb Influxdb) MonitorDelete(db string) error {
+	glog.Info("DEGUB:: Influxdb delete monitor ", db)
+	attempts := 10
+	for attempts > 0 {
+		verdict, err := influxdb.DoesDatabaseExist(db)
+		if err != nil {
+			return err
+		}
+		if !verdict {
+			return nil
+		}
+		attempts--
+		time.Sleep(time.Second)
+	}
+	return errors.New("Database still found: "+db)
+}
+
+// Reference:
+// https://github.com/influxdata/influxdb1-client/blob/master/influxdb.go
+// (Loosely translated, no error handling, etc.)
+type Result struct {
+	Series   []models.Row
+}
+type Response struct {
+	Results []Result
+}
+
+func (influxdb Influxdb) DoesDatabaseExist(db string) (bool, error) {
+	glog.Info("DEGUB:: Influxdb checking database ", db)
+	q := "q=SHOW DATABASES"
+	baseUrl := influxdb.Host + "/query"
+	resp, err := influxdb.Client.Post(baseUrl, "application/x-www-form-urlencoded",
+		bytes.NewBuffer([]byte(q)))
+	if err != nil {
+		return false, err
+	}
+	body, err2 := ioutil.ReadAll(resp.Body)
+	if err2 != nil {
+		return false, err2
+	}
+	var listResponse Response
+	json.Unmarshal(body, &listResponse)
+	for _, result := range listResponse.Results {
+		for _, series := range result.Series {
+			for _, value := range series.Values {
+				for _, subvalue := range value {
+					if subvalue == db {
+						return true, nil
+					}
+				}
+			}
+		}
+	}
+	return false, nil
+}
+
 // Creates db and rp where tests will run
 func (influxdb Influxdb) Setup(db string, duration string, rp string) error {
 	glog.Info("DEGUB:: Influxdb setup ", db+":"+rp)
@@ -111,6 +188,9 @@ func (influxdb Influxdb) Setup(db string, duration string, rp string) error {
 	if err != nil {
 		return err
 	}
+	if err2 := influxdb.MonitorCreate(db); err2 != nil {
+		return err2
+	}
 	return nil
 }
 
@@ -121,6 +201,9 @@ func (influxdb Influxdb) CleanUp(db string) error {
 		bytes.NewBuffer([]byte(q)))
 	if err != nil {
 		return err
+	}
+	if err2 := influxdb.MonitorDelete(db); err2 != nil {
+		return err2
 	}
 	glog.Info("DEBUG:: Influxdb cleanup database ", q)
 	return nil
