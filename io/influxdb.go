@@ -99,7 +99,7 @@ func (influxdb Influxdb) Data(data []string, db string, rp string) error {
 
 // Monitor for db create/delete
 func (influxdb Influxdb) MonitorCreate(db string) error {
-	glog.Info("DEGUB:: Influxdb create monitor ", db)
+	glog.Info("DEBUG:: Influxdb create monitor ", db)
 	attempts := 10
 	for attempts > 0 {
 		verdict, err := influxdb.DoesDatabaseExist(db)
@@ -115,7 +115,7 @@ func (influxdb Influxdb) MonitorCreate(db string) error {
 	return errors.New("Database not found: "+db)
 }
 func (influxdb Influxdb) MonitorDelete(db string) error {
-	glog.Info("DEGUB:: Influxdb delete monitor ", db)
+	glog.Info("DEBUG:: Influxdb delete monitor ", db)
 	attempts := 10
 	for attempts > 0 {
 		verdict, err := influxdb.DoesDatabaseExist(db)
@@ -142,7 +142,7 @@ type Response struct {
 }
 
 func (influxdb Influxdb) DoesDatabaseExist(db string) (bool, error) {
-	glog.Info("DEGUB:: Influxdb checking database ", db)
+	glog.Info("DEBUG:: Influxdb checking database ", db)
 	q := "q=SHOW DATABASES"
 	baseUrl := influxdb.Host + "/query"
 	resp, err := influxdb.Client.Post(baseUrl, "application/x-www-form-urlencoded",
@@ -172,7 +172,7 @@ func (influxdb Influxdb) DoesDatabaseExist(db string) (bool, error) {
 
 // Creates db and rp where tests will run
 func (influxdb Influxdb) Setup(db string, duration string, rp string) error {
-	glog.Info("DEGUB:: Influxdb setup ", db+":"+rp)
+	glog.Info("DEBUG:: Influxdb setup ", db+":"+rp)
 	// If no retention policy is defined, use "autogen"
 	if rp == "" {
 		rp = "autogen"
